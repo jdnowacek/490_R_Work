@@ -1,0 +1,46 @@
+---
+title: "Nowacek HW 4-4"
+format: pdf
+editor: visual
+---
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(survival)
+library(survminer)
+library(tidyr)
+library(kableExtra)
+library(broom)
+```
+
+```{r}
+d <- read_csv("https://www2.stat.duke.edu/courses/Fall24/sta490.01/data/hw4.csv")
+
+ggplot(aes(x = week), data = d) +
+  geom_histogram() +
+  facet_grid(~ educ) +
+  theme_bw()
+```
+
+```{r}
+p <- survfit(Surv(week, arrest) ~ educ, data = d)
+
+ggsurvplot(p, 
+           main = "Kaplan-Meier Estimates by Education Status", 
+           xlab = "Weeks",
+           ylab = "Estimated Survival Probability",
+           ylim = c(0.5, 1), conf.int = FALSE, censor = FALSE)
+```
+
+Here is the distribution of survival times, showing us the common censoring time, and the relative size of the groups. Followed by the survival curves for each group. Nothing in these graphs in incriminating for the log-rank test method, we now proceed with a log-rank test with the following hypotheses:
+
+$H_0$: Under the null hypothesis, there is no significant association between education category and the time to recidivism in those groups. The survival functions across the education levels are assumed to be identical.
+
+$H_a$: Under the alternate hypothesis, there is a significant association between education category and the time to recidivism in those groups. At least one of the survival functions across the education levels are assumed to be different than the rest.
+
+```{r}
+model <- survdiff(Surv(week, arrest) ~ educ, data = d)
+model
+```
+
+This model shows us that there are significant differences in the survival of groups based on education. The chi-square statistic in this case is 10.5, and on the chi-square distribution with four degrees of freedom (distribution under the null), the p-value is 0.03, indicating evidence for significant differences between the groups' survival at the $\alpha = 0.05$ level. This allows us to reject our null hypothesis that there are no effects of education on time to recidivism.

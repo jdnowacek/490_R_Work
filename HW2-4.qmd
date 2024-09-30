@@ -1,5 +1,5 @@
 ---
-title: "Nowacek HW 2"
+title: "Nowacek HW 2-4"
 format: pdf
 editor: visual
 ---
@@ -11,27 +11,6 @@ library(survminer)
 library(tidyr)
 library(kableExtra)
 library(broom)
-```
-
-# Problem 3
-
-```{r}
-data <- tibble(
-  ID = c(1, 2, 3, 4, 5, 6),
-  time = c(4.5, 7.5, 8.5, 11.5, 13.5, 17),
-  failure = c(1, 1, 0, 1, 0, 1)
-)
-```
-
-```{r}
-KM_est <- Surv(data$time, data$failure)
-
-KM_fit <- survfit(Surv(time, failure) ~ 1, data = data) 
-summary(KM_fit, time = 12)
-```
-
-```{r}
-plot(KM_fit)
 ```
 
 # Problem 4
@@ -58,11 +37,12 @@ Survival here means making it through a year post-release from prison without re
 ```{r}
 summary(prison_fit, time = 24)
 ```
-The survival estimate for the married subjects is 0.9623 and 0.8786 for not married subjects. 
 
-### Describe what you see in the relationship here (no need to do any hypothesis test or anything, we haven't learned any yet!). 
+The survival estimate for the married subjects is 0.9623 and 0.8786 for not married subjects.
 
-The married group is more likely to survive the full year without recidivism, especially towards the beginning, after about 38 weeks, the married group drops in survival probability to come closer to the non-married group which decreases in survival probability fairly steadily over the year. 
+### Describe what you see in the relationship here (no need to do any hypothesis test or anything, we haven't learned any yet!).
+
+The married group is more likely to survive the full year without recidivism, especially towards the beginning, after about 38 weeks, the married group drops in survival probability to come closer to the non-married group which decreases in survival probability fairly steadily over the year.
 
 ### Why do you think one of the curves seems much "blockier" than the other? (you may attach any files as necessary).
 
@@ -72,4 +52,5 @@ prison |>
   count() |>
   kable()
 ```
-The married group's curve seems blockier because the sample size is smaller, leading to each individual case being more apparent in its influence on the plot. 
+
+The married group's curve seems blockier because the sample size is smaller, leading to each individual case being more apparent in its influence on the plot.

@@ -1,0 +1,38 @@
+---
+title: "Nowacek HW 4-3"
+format: pdf
+editor: visual
+---
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(survival)
+library(survminer)
+library(tidyr)
+library(kableExtra)
+library(broom)
+```
+
+```{r}
+df <- tibble(
+  time = c(1, 2, 3, 4, 5, 5, 5, 5, 5, 5),
+  failure = c(1, 1, 1, 1, 1, 0, 0, 0, 0, 0),
+  group = c('A', 'A', 'B', 'A', 'B', "A", "A", "B", "B", "B")
+)
+```
+
+```{r}
+fit <- survdiff(Surv(time, failure) ~ group, data = df)
+fit
+```
+
+```{r}
+N1j <- c(5, 4, 3, 3, 2)
+N2j <- c(5, 5, 5, 4, 4)
+dj <- c(1, 1, 1, 1, 1)
+Nj <- c(10, 9, 8, 7, 6)
+Nj_minus_dj <- c(9, 8, 7, 6, 5)
+
+var <- (N1j*N2j*dj*Nj_minus_dj)/((Nj^2)*(Nj-1))
+var_sum <- sum(var)
+```

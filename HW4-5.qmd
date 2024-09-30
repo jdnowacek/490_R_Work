@@ -1,0 +1,32 @@
+---
+title: "Nowacek HW 4-5"
+format: pdf
+editor: visual
+---
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(survival)
+library(survminer)
+library(tidyr)
+library(kableExtra)
+library(broom)
+```
+
+```{r}
+d <- read_csv("https://www2.stat.duke.edu/courses/Fall24/sta490.01/data/hw4.csv")
+```
+
+```{r}
+d_test <- d
+d_treatment <- d |>
+  mutate(week_treatment = exp(week))
+
+model_test <- survdiff(Surv(week, arrest) ~ educ, data = d_treatment)
+model_test
+
+model_treatment <- survdiff(Surv(week_treatment, arrest) ~ educ, data = d_treatment)
+model_treatment
+```
+
+This comparison shows us that, with the exponential function, which fits the monotone increasing characteristic, the chi-square statistic changes. In our original data, the chi-square statistic is 10.5, and it increases to 10.9 when we exponentiate the survival times. This disproves the idea that any monotone increasing function of survival times yields the same test statistic as the original times.

@@ -1,0 +1,44 @@
+---
+title: "Nowacek HW 5-4"
+format: pdf
+editor: visual
+---
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(survival)
+library(survminer)
+library(tidyr)
+library(kableExtra)
+library(broom)
+```
+
+Data import
+
+```{r}
+data <- read.csv("https://www2.stat.duke.edu/courses/Fall24/sta490.01/data/hw5.csv")
+
+data |>
+  ggplot(aes(x = futime)) +
+  geom_histogram(binwidth = 5) +
+  facet_wrap(~ trt) +
+  theme_bw()
+```
+
+Is there evidence that laser treatment is beneficial in addressing blindness among patients with high risk diabetic retinopathy, controlling for age at diabetes diagnosis, laser type, and risk score?
+
+To answer this question, fit a parametric AFT model assuming that time-to-blindness has an **exponential** distribution, specifically interpret a relevant estimate from your AFT model, and conduct an appropriate hypothesis test at the $\alpha = 0.05$ level (provide the null and alternative hypotheses, the distribution of the relevant test statistic under the null hypothesis, and your conclusion in context of the problem).
+
+```{r}
+fit <- survreg(Surv(futime, status) ~ trt + risk + age + laser, 
+               data = data, dist = "exponential")
+summary(fit)
+```
+
+Null hypothesis: We **do not** expect to see a difference in log expected survival time for those patients who received treatment and those who did not.
+
+Alternative hypothesis: We **do** expect to see a difference in log expected survival time for those patients who received treatment and those who did not.
+
+Under the null hypothesis, the distribution of survival times is expected to be exponential.
+
+Since the coefficient of the treatment variable is significant at the $\alpha = 0.05$ level, we reject the null hypothesis, there is an association between treatment and survival times.

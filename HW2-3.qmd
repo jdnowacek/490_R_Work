@@ -1,0 +1,36 @@
+---
+title: "Nowacek HW 2-3"
+format: pdf
+editor: visual
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(survival)
+library(survminer)
+library(tidyr)
+library(kableExtra)
+library(broom)
+```
+
+# Problem 3
+
+```{r}
+data <- tibble(
+  ID = c(1, 2, 3, 4, 5, 6),
+  time = c(4.5, 7.5, 8.5, 11.5, 13.5, 17),
+  failure = c(1, 1, 0, 1, 0, 1)
+)
+```
+
+```{r}
+KM_est <- Surv(data$time, data$failure)
+
+KM_fit <- survfit(Surv(time, failure) ~ 1, data = data) 
+summary(KM_fit, time = 12)
+```
+
+```{r}
+plot(KM_fit)
+```
+
