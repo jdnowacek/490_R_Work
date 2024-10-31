@@ -42,3 +42,14 @@ Alternative hypothesis: We **do** expect to see a difference in log expected sur
 Under the null hypothesis, the distribution of survival times is expected to be exponential.
 
 Since the coefficient of the treatment variable is significant at the $\alpha = 0.05$ level, we reject the null hypothesis, there is an association between treatment and survival times.
+
+```{r}
+resids <- (log(data$futime) - fit$linear.predictors) / 1
+m1 <- survfit(Surv(resids, status) ~ 1, data = data)
+plot(m1, xlab = "AFT Residuals (Exp Model)", ylab = "Survival Probability")
+exp.x <- seq(min(resids), max(resids), length = 100)
+exp.y <- exp(-exp(exp.x)) # F(t)
+lines(exp.x, exp.y, col = "blue", lwd = 2)
+```
+
+Due to the deviation of the residual plot from the Kaplan_Meier estimate, we can not say that the expectation of an exponential distribution of the failure times is met.

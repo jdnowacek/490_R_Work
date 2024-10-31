@@ -1,0 +1,64 @@
+---
+title: "Nowacek MidtermQ4"
+format: pdf
+editor: visual
+---
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(survival)
+library(survminer)
+library(tidyr)
+library(kableExtra)
+library(broom)
+```
+
+## Q4
+
+```{r}
+data <- 
+read.csv("https://www2.stat.duke.edu/courses/Fall24/sta490.01/data/got_dat.csv")
+```
+
+### Part 1
+
+```{r}
+kme <- survfit(Surv(event_time_hrs, dth_flag) ~ social_status, data = data)
+
+ggsurvplot(kme, data = data,
+           main = "Kaplan-Meier Estimates by Social Status", 
+           xlab = "Run Time (Hours)",
+           ylab = "Estimated Survival Probability",
+           legend.title = "Social Status",
+           legend.labs = c("Highborn", "Lowborn"),
+           ylim = c(0.5, 1), conf.int = TRUE, censor = FALSE)
+```
+
+### Part 2
+
+```{r}
+logrt <- survdiff(Surv(event_time_hrs, dth_flag) ~ social_status, data = data)
+logrt
+```
+
+At the $\alpha = 0.05$ level, this test is not significant as the p-value is 0.5. This indicates that we can not reject the null hypothesis which states that there is no difference expected survival between high-born and low-born individuals. Therefore, we fail to reject the hypothesis that high-born individuals and low-born individuals have a different expectation in terms of the number of cumulative show-hours that they survive based on their social status alone.
+
+### Part 3
+
+```{r}
+aft <- survreg(Surv(event_time_hrs, dth_flag) ~ intro_time_hrs + 
+                 social_status + sex, 
+               data = data, dist = "weibull")
+summary(aft)
+```
+
+The question is, is there evidence for differential survival based on when a character first appears on screen.
+
+The coefficient for when a character first appears on screen is positive and significant at the $\alpha = 0.05$ level, indicating that as the introduction time increases, that is the character was introduced later in the show, their expected survival also increases, controlling for social status and sex.
+
+The coefficient of sex is also positive and significant at the $\alpha = 0.05$ level, indicating that women are expected to live longer than men, controlling for social status and when a character first appears on screen.
+
+The coefficient of social status is negative and significant at the $\alpha = 0.05$ level, indicating that lowborn individuals are expected to live longer than highborn individuals, controlling for social status and when a character first appears on screen.
+
+In conclusion, controlling for the other variables in the study, women are expected to live longer than men, lowborn individuals are expected to live longer than highborn individuals, and the later you were introduced to the show, the higher your expected survival.
+

@@ -1,0 +1,48 @@
+---
+title: "Nowacek HW 4-5"
+format: pdf
+editor: visual
+---
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(survival)
+library(survminer)
+library(tidyr)
+library(kableExtra)
+library(broom)
+```
+
+```{r}
+d <- read_csv("https://www2.stat.duke.edu/courses/Fall24/sta490.01/data/got_dat.csv")
+
+d_mod <- d |>
+  mutate(
+    sex = recode(sex, `1` = "M", `2` = "F"),
+    social_status = recode(social_status, `1` = "upper", `2` = "lower"))
+```
+
+```{r}
+ggplot(data = d_mod, aes(x = exp_time_hrs)) +
+  geom_histogram(binwidth = 3) +
+  facet_grid(sex ~ social_status) 
+  
+```
+
+```{r}
+cph <- coxph(Surv(event_time_hrs, dth_flag) ~ intro_time_hrs + social_status + sex, 
+             data = d)
+summary(cph)
+```
+
+The exponentiated coefficient of sex indicates that female characters are expected to have a hazard rate about 0.544 times as high as male characters, controlling for social status and intro time. The corresponding hypothesis test of that conclusion is:
+
+$H_0:$ There is no difference between the expected hazard rates of male and female characters with the same social status and intro time.
+
+$H_a:$ There is a difference between the expected hazard rates of male and female characters with the same social status and intro time.
+
+As the coefficient of sex is significant at the $\alpha = 0.05$ level, we can conclude reject the null hypothesis in favor of the alternative that there is a difference between the expected hazard rates of male and female characters with the same social status and intro time.
+
+This conclusion is consistent with that of the AFT model used in the midterm, as that model suggested that:
+
+"The coefficient of sex is also positive and significant at the $\alpha = 0.05$ level, indicating that women are expected to live longer than men, controlling for social status and when a character first appears on screen." - from my midterm.

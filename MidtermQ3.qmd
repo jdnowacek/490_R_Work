@@ -1,0 +1,56 @@
+---
+title: "Nowacek Midterm Q3"
+format: pdf
+editor: visual
+---
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(survival)
+library(survminer)
+library(tidyr)
+library(kableExtra)
+library(broom)
+```
+
+## Q3
+
+```{r}
+x <- seq(0, 3, 0.001)
+f1 <- 2*x - log(2*x + 1)
+f2 <- x^2 - log(2*x + 1)
+
+df <- data.frame(x = x, f1 = f1, f2 = f2)
+
+ggplot(df, aes(x = x)) +
+  geom_line(aes(y = f1, color = "f1")) +
+  geom_line(aes(y = f2, color = "f2")) +
+  theme_bw() +
+  scale_color_manual(name = "Function", values = c("f1" = "blue", "f2" = "red")) +
+  geom_hline(aes(yintercept = 0), linetype = "dotted")
+```
+
+```{r}
+f <- function(x) {
+  4 * x * exp(-2 * x)
+}
+
+integral_value <- integrate(f, lower = 0, upper = Inf)$value
+
+x1 <- seq(0, 6, 0.001) 
+ft <- f(x1)
+
+df1 <- data.frame(x1 = x1, ft = ft)
+
+ggplot(df1, aes(x = x1, y = ft)) +
+  geom_line() +
+  theme_bw() +
+  geom_area(aes(y = ft), fill = "blue", alpha = 0.5, data = subset(df1, x1 >= 0 & x1 <= 6)) +
+  annotate("text", x = 3, y = max(ft) / 2, 
+           label = paste("Integral =", round(integral_value, 3)), 
+           color = "black", size = 5, hjust = 0.5) +
+  labs(title = "Density Plot with Integral from 0 to Infinity Displayed",
+       y = "Density Value", x = "x") +
+  coord_cartesian(xlim = c(0, 6))
+```
+
