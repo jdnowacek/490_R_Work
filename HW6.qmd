@@ -29,6 +29,9 @@ ggplot(data = d_mod, aes(x = exp_time_hrs)) +
   
 ```
 
+
+## Problem 2
+
 ```{r}
 cph <- coxph(Surv(exp_time_hrs, dth_flag) ~ intro_time_hrs + social_status + sex, 
              data = d)
@@ -47,7 +50,7 @@ This conclusion is consistent with that of the AFT model used in the midterm, as
 
 "The coefficient of sex is also positive and significant at the $\alpha = 0.05$ level, indicating that women are expected to live longer than men, controlling for social status and when a character first appears on screen." - from my midterm.
 
-## Problem 2
+## Problem 3
 
 ```{r}
 ggcoxdiagnostics(cph, type = "schoenfeld")
@@ -59,7 +62,7 @@ cox.zph(cph)
 
 From the Grambsch and Therneau test, at an alpha = 0.05 level, we do not have significant evidence to reject the null hypothesis of proportional hazards for sex, though it is marginal. So, our test suggests that the assumption of proportional hazards holds for sex, and does not hold for intro time or social status.
 
-## Problem 3
+## Problem 4
 
 ```{r}
 # Generate baseline hazards
