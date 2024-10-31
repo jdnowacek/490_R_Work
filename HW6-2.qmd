@@ -30,7 +30,7 @@ ggplot(data = d_mod, aes(x = exp_time_hrs)) +
 ```
 
 ```{r}
-cph <- coxph(Surv(event_time_hrs, dth_flag) ~ intro_time_hrs + social_status + sex, 
+cph <- coxph(Surv(exp_time_hrs, dth_flag) ~ intro_time_hrs + social_status + sex, 
              data = d)
 summary(cph)
 ```
@@ -46,3 +46,64 @@ As the coefficient of sex is significant at the $\alpha = 0.05$ level, we can co
 This conclusion is consistent with that of the AFT model used in the midterm, as that model suggested that:
 
 "The coefficient of sex is also positive and significant at the $\alpha = 0.05$ level, indicating that women are expected to live longer than men, controlling for social status and when a character first appears on screen." - from my midterm.
+
+## Problem 2
+
+```{r}
+ggcoxdiagnostics(cph, type = "schoenfeld")
+```
+
+```{r}
+cox.zph(cph)
+```
+
+From the Grambsch and Therneau test, at an alpha = 0.05 level, we do not have significant evidence to reject the null hypothesis of proportional hazards for sex, though it is marginal. So, our test suggests that the assumption of proportional hazards holds for sex, and does not hold for intro time or social status.
+
+## Problem 3
+
+```{r}
+# Generate baseline hazards
+breslow <- basehaz(cph, d, centered = TRUE)
+
+# Pull out the time column
+time_col <- breslow$time
+
+# Remove the time column using select
+breslow <- breslow |>
+  select(-time)
+
+# Rename columns using d$name
+colnames(breslow) <- d$name
+
+# Bind the time column back as a new column
+breslow <- bind_cols(breslow, time = time_col)
+
+# Filter for the specific time value
+filtered_b <- breslow |>
+  filter(time == "1.02")
+
+# Transform to long format and create final structure
+f_b_long <- filtered_b |>
+  pivot_longer(
+    cols = -time, 
+    names_to = "name",  # Create a new column for the names of the original columns
+    values_to = "haz"
+  ) |>
+  mutate(time = filtered_b$time[1]) |>
+  select(time, name, haz)  # Include the new 'variable' column
+```
+
+
+```{r}
+f_b_long <- f_b_long |>
+  mutate(surv_prob = exp(-(haz)))
+```
+
+The dataset f_b_long displays the estimated hazard rate of each individual at time = 1.02. 
+
+The three lowest estimated survival probabilities belong to Lannister Soldier (intro time = 62.89), 	
+Unsullied Lieutenant/Captain, and Crying Man in that order. ALso in order, their survival probabilies are 0.7308369, 0.7326807, and 0.7327012 respectively. These slight differences are due to different intro times, as they are all male lower class.
+
+The three highest to Catelyn, Sansa, and Arya Stark. These three each have the same estimated survival probability at 0.9365556 as all of their covariates are the same: intro time of 0.13, females, and highborn.
+
+
