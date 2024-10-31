@@ -1,0 +1,49 @@
+---
+title: "Nowacek 10-31 Class Data Analysis"
+format: pdf
+editor: visual
+---
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(survival)
+library(survminer)
+library(tidyr)
+library(kableExtra)
+library(broom)
+```
+
+```{r}
+data <- read_csv("classdat.csv")
+```
+
+```{r}
+data <- data |>
+  mutate(bin_emp = ifelse(!is.na(emp_time), 1, 0))
+```
+
+```{r}
+cph <- coxph(Surv(week, arrest) ~ bin_emp + prio + mar + age, 
+             data = data)
+summary(cph)
+```
+
+If an individual is employed at any time after release, there is significant evidence for an association between that status and the time to re-arrest. We find that, controlling for marital status, age, and number of prior arrests, we expect that an individual who did find employment has a hazard rate about 0.4 times as high as an individual who did not find employment.
+
+This analysis is no good because the time that you have to find employment is dependent on the amount of time you had before re-arrest. This association is called immortal time bias and renders this analysis ineffective.
+
+## Landmark analysis
+
+```{r}
+data <- data |>
+  mutate(landmark_emp = ifelse(emp_time <= 8, 1, 0))
+# maybe a little wrong because NAs in emp_time are treated incorrectly
+
+landmark <- data |>
+  drop_na(landmark_emp)
+
+cph_landmark <- coxph(Surv(week, arrest) ~ landmark_emp + prio + mar + age, 
+             data = landmark)
+
+summary(cph_landmark)
+```
