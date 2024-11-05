@@ -1,5 +1,5 @@
 ---
-title: "Nowacek 10-31 Class Data Analysis"
+title: "Cox Data Analysis"
 format: pdf
 editor: visual
 ---
