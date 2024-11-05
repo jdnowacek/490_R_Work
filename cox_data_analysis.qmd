@@ -47,3 +47,9 @@ cph_landmark <- coxph(Surv(week, arrest) ~ landmark_emp + prio + mar + age,
 
 summary(cph_landmark)
 ```
+
+```{r}
+
+```
+
+Idea behind time varying covariates is to allow for the changes in covariates that happen between study start and failure time to be recorded and evaluated as part of the model. To do so, we add rows to the dataset, one individual will have multiple rows: first the starting values of all of their time-varying covariates, then each time one of them change, the first row is "censored" with a t-stop time, the next row picks up with that t-stop as the new t-start, new values for the covariate in question, and a new t-stop of either failure time or the next time a covariate changes for that individual. Only one of these rows will be in the risk set at any give time.
