@@ -1,0 +1,129 @@
+---
+title: "Nowacek HW 8"
+format: pdf
+editor: visual
+---
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(survival)
+library(survminer)
+library(tidyr)
+library(kableExtra)
+library(broom)
+```
+
+## Excercise 2
+
+```{r}
+library(carData)
+
+data <- Rossi
+```
+
+```{r}
+ids <- seq(1, nrow(data))
+
+data <- data |>
+  mutate(id = ids) |>
+  relocate(id, .before = week)
+```
+
+```{r}
+data_long <- data |>
+  pivot_longer(
+    cols = starts_with("emp"),
+    names_to = "emp_week",
+    names_prefix = "emp",
+    values_to = "emp_tv"
+  ) |>
+  mutate(emp_week = as.numeric(emp_week)) |>
+  arrange(id, emp_week) |>
+  group_by(id) |>
+  mutate(
+    change_point = cumsum(emp_tv != lag(emp_tv, default = first(emp_tv))),
+    start = if_else(emp_week == 1, 0, lag(emp_week)),
+    stop = emp_week
+  ) |>
+  ungroup() |>
+  group_by(id, change_point) |>
+  summarise(
+    start = min(start),
+    stop = max(stop),
+    emp_tv = first(emp_tv),
+    week = first(week),
+    arrest = first(arrest),
+    age = first(age),
+    race = first(race),
+    wexp = first(wexp),
+    mar = first(mar),
+    paro = first(paro),
+    prio = first(prio),
+    educ = first(educ),
+    .groups = "drop"
+  ) |>
+  select(id, week, arrest, age, race, wexp, mar, paro, prio, educ, emp_tv, start, stop) |>
+  filter(!is.na(emp_tv))
+```
+
+```{r}
+cph_tv <- coxph(Surv(start, stop, arrest) ~ emp_tv + age + mar + prio, 
+            data = data_long)
+summary(cph_tv) 
+```
+
+## Excercise 3
+
+```{r}
+library(asympTest)
+library(cmprsk)
+
+dig <- DIGdata
+
+dig <- dig |>
+  mutate(hfdeath = ifelse(REASON == 1, "hf", "other"),
+         hfdeath = ifelse(is.na(hfdeath), "censored", hfdeath),
+         hf_spec_risk = ifelse(REASON == 1, 1, 0),
+         hf_spec_risk = ifelse(is.na(hf_spec_risk), 0, hf_spec_risk))
+
+finegray <- cuminc(ftime = dig$DEATHDAY, fstatus = dig$hfdeath, group = dig$TRTMT)
+
+cause_spef_haz <- survfit(Surv(DEATHDAY, hf_spec_risk) ~ TRTMT, data = dig)
+
+colors <- c("darkgrey", "lightgrey", "blue", "lightblue", "darkgrey", "lightgrey")
+
+
+# Plot cumulative incidence function (using add = TRUE to keep plot open for new lines)
+plot(finegray, col = colors, lty = 1:2, lwd = 2, xlab = "Days", main = "Cumulative Incidence and Cause-Specific Hazard Curves")
+
+# Add cause-specific hazard (1 - Survival) curves for each treatment group
+# Treatment group TRTMT = 0
+lines(
+  cause_spef_haz$time[cumsum(c(0, cause_spef_haz$strata))[1] + 1:cause_spef_haz$strata[1]], 
+  1 - cause_spef_haz$surv[cumsum(c(0, cause_spef_haz$strata))[1] + 1:cause_spef_haz$strata[1]], 
+  col = "darkred", lty = 2, lwd = 2
+)
+
+# Treatment group TRTMT = 1
+lines(
+  cause_spef_haz$time[cumsum(c(0, cause_spef_haz$strata))[2] + 1:cause_spef_haz$strata[2]], 
+  1 - cause_spef_haz$surv[cumsum(c(0, cause_spef_haz$strata))[2] + 1:cause_spef_haz$strata[2]], 
+  col = "purple", lty = 2, lwd = 2
+)
+
+# Add a legend to distinguish between cumulative incidence and cause-specific hazard curves
+legend("topright", legend = c("Cumulative Incidence (Fine-Gray)", "Cause-Specific Hazard TRTMT=0", "Cause-Specific Hazard TRTMT=1"),
+       col = c("blue", "darkred", "purple"), lty = c(1, 2, 2), lwd = 2)
+
+
+# plot(finegray, col = colors, lty = 1:2, lwd = 1, xlab = "Days", ylim = c(0, 0.6))
+# lines(cause_spef_haz$time, 1-cause_spef_haz$surv)
+```
+
+
+
+
+
+
+
+
